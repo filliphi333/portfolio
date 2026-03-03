@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Filliphi — Web Developer",
-  description: "Portfolio of Filliphi Schlickmann — Web developer.",
+  title: "Filliphi — IT Portfolio",
+  description: "Portfolio of Filliphi Schlickmann — IT / Systems.",
 };
 
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Server, Menu, X } from "lucide-react";
+import { Terminal, Menu, X, FileText, ArrowRight } from "lucide-react";
 
 function safeScrollToId(id) {
   if (typeof window === "undefined") return;
@@ -11,51 +11,71 @@ function safeScrollToId(id) {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function NavPill({ label, onClick, index = 0 }) {
+function NavItem({ label, onClick, index = 0, isRoute = false }) {
+  if (isRoute) {
+    return (
+      <motion.button
+        onClick={onClick}
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.04 * index }}
+        whileHover={{ y: -1 }}
+        whileTap={{ scale: 0.97 }}
+        className="group relative flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold overflow-hidden focus:outline-none"
+        aria-label={label}
+        type="button"
+      >
+        <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600/80 to-purple-600/80 opacity-90 group-hover:opacity-100 transition-opacity" />
+        <span className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.12),transparent_70%)]" />
+        <FileText className="relative h-3.5 w-3.5 text-white/80" />
+        <span className="relative text-white">{label}</span>
+        <ArrowRight className="relative h-3 w-3 text-white/60 transition-transform group-hover:translate-x-0.5" />
+      </motion.button>
+    );
+  }
+
   return (
     <motion.button
       onClick={onClick}
-      initial={{ opacity: 0, y: -6 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.04 * index }}
       whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.98 }}
-      className="group relative rounded-full p-[1px] focus:outline-none"
+      whileTap={{ scale: 0.97 }}
+      className="group relative rounded-xl px-4 py-2 text-sm font-semibold text-zinc-300 border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.15] hover:text-white transition-all duration-200 focus:outline-none"
       aria-label={label}
       type="button"
     >
-      <span className="pointer-events-none absolute -inset-[6px] rounded-full opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-100 bg-[conic-gradient(from_180deg_at_50%_50%,rgba(59,130,246,0.0),rgba(99,102,241,0.55),rgba(168,85,247,0.55),rgba(59,130,246,0.0))]" />
-      <span className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(120deg,rgba(59,130,246,0.75),rgba(168,85,247,0.75),rgba(99,102,241,0.75))] opacity-40 group-hover:opacity-90 transition-opacity" />
-
-      <span className="relative flex items-center gap-2 rounded-full bg-zinc-950/70 px-4 py-2 text-sm font-semibold text-zinc-200 backdrop-blur-md border border-white/10 group-hover:border-white/20 transition-all">
-        <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-          <span className="absolute -left-1/2 top-0 h-full w-1/2 bg-white/10 blur-md skew-x-[-20deg] translate-x-[-140%] group-hover:translate-x-[260%] transition-transform duration-700" />
-        </span>
-
-        <span className="relative">
-          {label}
-          <span className="pointer-events-none absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 group-hover:scale-x-100 transition-transform duration-300" />
-        </span>
-      </span>
+      <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-white/[0.04] to-transparent" />
+      <span className="relative">{label}</span>
     </motion.button>
   );
 }
 
-function MobileNavButton({ label, onClick }) {
+function MobileNavButton({ label, onClick, isRoute = false }) {
   return (
     <motion.button
       onClick={onClick}
       whileTap={{ scale: 0.98 }}
-      className="group relative block w-full overflow-hidden rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-base font-semibold text-zinc-200"
+      className={`group relative block w-full overflow-hidden rounded-xl px-4 py-3.5 text-left text-[15px] font-semibold ${
+        isRoute
+          ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/20 text-blue-200"
+          : "border border-white/[0.06] bg-white/[0.03] text-zinc-200"
+      }`}
       type="button"
     >
-      <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <span className="absolute -left-1/2 top-0 h-full w-1/2 bg-white/10 blur-md skew-x-[-20deg] translate-x-[-140%] group-hover:translate-x-[260%] transition-transform duration-700" />
-      </span>
+      <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/[0.04]" />
 
       <span className="relative flex items-center justify-between">
-        {label}
-        <span className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+        <span className="flex items-center gap-2">
+          {isRoute && <FileText className="h-4 w-4 text-blue-300" />}
+          {label}
+        </span>
+        {isRoute ? (
+          <ArrowRight className="h-4 w-4 text-blue-400/60" />
+        ) : (
+          <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+        )}
       </span>
     </motion.button>
   );
@@ -71,12 +91,10 @@ export default function Header({
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Close menu on route change
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
-  // Scroll shadow
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     onScroll();
@@ -84,7 +102,6 @@ export default function Header({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Prevent page scroll behind mobile menu
   useEffect(() => {
     if (typeof document === "undefined") return;
     if (!menuOpen) return;
@@ -96,7 +113,6 @@ export default function Header({
     };
   }, [menuOpen]);
 
-  // Close menu if viewport becomes desktop
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth >= 768) setMenuOpen(false);
@@ -107,32 +123,25 @@ export default function Header({
 
   const shellClass = useMemo(() => {
     return scrolled
-      ? "bg-zinc-950/70 backdrop-blur-xl border-b border-white/5 shadow-[0_10px_40px_rgba(0,0,0,0.45)]"
+      ? "bg-zinc-950/80 backdrop-blur-2xl border-b border-white/[0.04] shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
       : "bg-transparent";
   }, [scrolled]);
 
   const handleNav = useCallback(
     (link) => {
       if (!link) return;
-
-      // Always close the menu immediately
       setMenuOpen(false);
 
-      // Route link: go there
       if (link.type === "route") {
         router.push(link.to);
         return;
       }
 
-      // Scroll link:
-      // If we aren't on the homepage, go home first and include a hash,
-      // then the home page can scroll after mount (or the browser will jump to hash).
       if (pathname !== "/") {
         router.push(`/#${link.to}`);
         return;
       }
 
-      // Already on home: smooth scroll
       safeScrollToId(link.to);
     },
     [router, pathname]
@@ -141,13 +150,11 @@ export default function Header({
   const handleBrandClick = useCallback(() => {
     setMenuOpen(false);
 
-    // If not on home, go home
     if (pathname !== "/") {
       router.push("/");
       return;
     }
 
-    // On home: scroll to hero
     safeScrollToId("hero");
   }, [pathname, router]);
 
@@ -155,12 +162,11 @@ export default function Header({
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`fixed left-0 right-0 top-0 z-[999] transition-all duration-300 ${shellClass}`}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`fixed left-0 right-0 top-0 z-[999] transition-all duration-500 ${shellClass}`}
     >
       <div className="mx-auto max-w-6xl px-6">
-        <div className="flex h-20 items-center justify-between">
-          {/* Brand */}
+        <div className="flex h-[72px] items-center justify-between">
           <button
             onClick={handleBrandClick}
             className="flex items-center gap-3 group"
@@ -168,64 +174,68 @@ export default function Header({
             aria-label="Go to top"
           >
             <div className="relative">
-              <div className="absolute inset-0 rounded-lg bg-blue-500/20 blur-md group-hover:bg-purple-500/25 transition-all" />
-              <div className="relative rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-2.5 border border-white/10 group-hover:border-blue-300/40 transition-all">
-                <Server className="h-7 w-7 text-blue-300" />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/25 to-purple-500/25 blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative rounded-xl bg-zinc-900/80 p-2 border border-white/[0.08] group-hover:border-white/15 transition-all duration-300">
+                <Terminal className="h-6 w-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
               </div>
             </div>
 
             <div className="flex flex-col leading-tight">
-              <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent group-hover:from-blue-200 group-hover:to-purple-300 transition-all">
+              <span className="text-xl font-extrabold tracking-tight text-white group-hover:text-blue-50 transition-colors">
                 Filliphi
               </span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-400 group-hover:text-blue-300/80 transition-colors">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 group-hover:text-zinc-400 transition-colors">
                 {brandSubtitle}
               </span>
             </div>
           </button>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((l, i) => (
-              <NavPill
+              <NavItem
                 key={`${l.name}-${l.to}`}
                 label={l.name}
                 index={i}
-                onClick={() => handleNav(l)}   // ✅ pass whole link object
+                isRoute={l.type === "route"}
+                onClick={() => handleNav(l)}
               />
             ))}
           </div>
 
-          {/* Mobile toggle */}
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="md:hidden relative rounded-xl p-2 text-zinc-200"
+            className="md:hidden relative rounded-xl p-2.5 text-zinc-300 hover:text-white transition-colors"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             type="button"
           >
-            <span className="absolute inset-0 rounded-xl bg-white/5 border border-white/10" />
+            <span className="absolute inset-0 rounded-xl bg-white/[0.04] border border-white/[0.06]" />
             <span className="relative">
-              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {menuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </span>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl"
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="md:hidden border-b border-white/[0.04] bg-zinc-950/95 backdrop-blur-2xl"
           >
-            <div className="space-y-2 px-6 pb-6 pt-2">
+            <div className="space-y-2 px-6 pb-6 pt-3">
               {navLinks.map((l) => (
                 <MobileNavButton
                   key={`${l.name}-${l.to}`}
                   label={l.name}
-                  onClick={() => handleNav(l)}  // ✅ pass whole link object
+                  isRoute={l.type === "route"}
+                  onClick={() => handleNav(l)}
                 />
               ))}
             </div>
