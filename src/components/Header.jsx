@@ -130,19 +130,23 @@ export default function Header({
   const handleNav = useCallback(
     (link) => {
       if (!link) return;
-      setMenuOpen(false);
 
       if (link.type === "route") {
+        setMenuOpen(false);
         router.push(link.to);
         return;
       }
 
       if (pathname !== "/") {
+        setMenuOpen(false);
         router.push(`/#${link.to}`);
         return;
       }
 
-      safeScrollToId(link.to);
+      setMenuOpen(false);
+      setTimeout(() => {
+        safeScrollToId(link.to);
+      }, 50);
     },
     [router, pathname]
   );
